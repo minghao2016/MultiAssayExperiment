@@ -17,12 +17,11 @@
 #'
 #' @description
 #' The \code{MultiAssayExperiment} class can be used to manage results of
-#' diverse assays on a collection of specimen. Currently,  the class can handle
+#' diverse assays on a collection of specimen. Currently, the class can handle
 #' assays that are organized instances of
 #' \code{\linkS4class{SummarizedExperiment}},
-#' \code{\linkS4class{ExpressionSet}},
-#' \code{matrix}, \code{\link{RangedRaggedAssay}}
-#' (inherits from \code{\linkS4class{GRangesList}}), and \code{RangedVcfStack}.
+#' \code{\linkS4class{ExpressionSet}}, \code{matrix},
+#' \code{RaggedExperiment} and \code{RangedVcfStack}.
 #' Create new \code{MultiAssayExperiment} instances with the eponymous
 #' constructor, minimally with the argument \code{\link{ExperimentList}},
 #' potentially also with the arguments \code{pData} (see section below) and
@@ -35,11 +34,10 @@
 #' arguments to be sent to \link{findOverlaps}. When using the \strong{reduce}
 #' method, the dots are used to specify arguments for the supplied
 #' \code{combine} argument and function. When using the \strong{assay} method,
-#' additional arguments may be passed to the \code{RangedRaggedAssay} method.
-#' See the link for more information:
-#' \link{assay,RangedRaggedAssay,missing-method}. When using \strong{c} method
-#' to add experiments to a \code{MultiAssayExperiment}, the dots allow extra
-#' data classes compatible with the MultiAssayExperiment API. See: \link{API}
+#' additional arguments may be passed.
+#' When using \strong{c} method to add experiments to a
+#' \code{MultiAssayExperiment}, the dots allow extra data classes compatible
+#' with the MultiAssayExperiment API. See: \link{API}
 #'
 #' @section pData:
 #' The \code{pData} slot is a collection of primary specimen data valid across
@@ -314,7 +312,7 @@ setMethod("names", "MultiAssayExperiment", function(x)
 #' example("MultiAssayExperiment")
 #'
 #' ## Replacement method for a MultiAssayExperiment sampleMap
-#' sampleMap(myMultiAssayExperiment) <- DataFrame()
+#' sampleMap(myMultiAssayExperiment) <- S4Vectors::DataFrame()
 #'
 #' @return A \code{sampleMap} with replacement values
 setGeneric("sampleMap<-", function(object, value) {

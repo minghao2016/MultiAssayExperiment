@@ -23,6 +23,6 @@ Replace a slot value with a given \code{DataFrame}
 example("MultiAssayExperiment")
 
 ## Replacement method for a MultiAssayExperiment sampleMap
-sampleMap(myMultiAssayExperiment) <- DataFrame()
+sampleMap(myMultiAssayExperiment) <- S4Vectors::DataFrame()
 
 }

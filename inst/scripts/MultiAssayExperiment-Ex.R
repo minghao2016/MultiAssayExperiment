@@ -1,13 +1,6 @@
 ## Run the example ExperimentList
 example("ExperimentList")
 
-## Load example GRangesList object
-example("RangedRaggedAssay")
-
-## Add the RangedRaggedAssay to the list
-ExpList <- c(ExpList, myRRA)
-names(ExpList)[4] <- "CNVgistic"
-
 ## Run the sample map example
 example("sampleMap")
 

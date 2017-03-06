@@ -1,7 +1,7 @@
-#' @include RangedRaggedAssay-class.R MultiAssayExperiment-class.R
-#' ExperimentList-class.R MultiAssayView-class.R
+#' @include MultiAssayExperiment-class.R ExperimentList-class.R
 #'
 #' @import BiocGenerics SummarizedExperiment S4Vectors GenomicRanges methods
+#' RaggedExperiment
 #' @importFrom utils .DollarNames
 #' @importFrom reshape2 melt
 #' @importFrom tidyr gather
@@ -278,9 +278,9 @@ setMethod("subsetBypData", c("MultiAssayExperiment", "character"),
 #' example("MultiAssayExperiment")
 #'
 #' subsetByColumn(myMultiAssayExperiment, list(Affy = 1:2,
-#'                 Methyl450k = c(3,5,2), RNASeqGene = 2:4, CNVgistic = 1))
+#'                 Methyl450k = c(3,5,2), RNASeqGene = 2:4))
 #'
-#' subsetWith <- mendoapply(`[`, colnames(myMultiAssayExperiment),
+#' subsetWith <- IRanges::mendoapply(`[`, colnames(myMultiAssayExperiment),
 #'                         MoreArgs = list(1:2))
 #' subsetByColumn(myMultiAssayExperiment, subsetWith)
 #'
@@ -359,8 +359,12 @@ setMethod("subsetByColumn", c("MultiAssayExperiment", "List"),
 #' ## Load a MultiAssayExperiment example
 #' example("MultiAssayExperiment")
 #'
+#' library(GenomicRanges)
+#' library(IRanges)
+#'
 #' ## Use a GRanges object to subset rows where ranged data present
-#' egr <- GRanges(seqnames = "chr1", IRanges(start = 1, end = 3), strand = "-")
+#' egr <- GRanges(seqnames = "chr1", IRanges(start = 1,
+#'     end = 3), strand = "-")
 #' subsetByRow(myMultiAssayExperiment, egr)
 #'
 #' ## Use a logical vector (recycling used)
@@ -443,14 +447,13 @@ setMethod("complete.cases", "MultiAssayExperiment", function(...) {
 #' @param object Any supported class object
 #' @param shape A single string indicating the shape of the resulting data,
 #' options include \sQuote{long} and \sQuote{wide} (defaults to the former)
-#' @param ... Additional arguments for the \link{RangedRaggedAssay}
+#' @param ... Additional arguments
 #' \code{assay} method. See below.
 #'
 #' @examples
-#' example("RangedRaggedAssay")
-#' rearrange(myRRA, background = 0)
+#' rearrange(matrix(rnorm(20), ncol = 4,
+#' dimnames = list(paste0("ENST0000", 1:5), c("A", "B", "C", "D"))))
 #'
-#' @seealso \code{\link{assay,RangedRaggedAssay,missing-method}}
 #' @return Either a long or wide \code{\linkS4class{DataFrame}}
 #' @export rearrange
 setGeneric("rearrange", function(object, shape = "long", ...)
@@ -483,16 +486,6 @@ setMethod("rearrange", "ANY", function(object, shape = "long", ...) {
     rectangle <- S4Vectors::DataFrame(object)
     rectangle[, "colname"] <- S4Vectors::Rle(rectangle[["colname"]])
     rectangle
-})
-
-#' @describeIn rearrange \linkS4class{RangedRaggedAssay} class method to return
-#' matrix of selected \dQuote{mcolname} column, defaults to score
-#' @export
-setMethod("rearrange", "RangedRaggedAssay", function(object,
-                                                     shape = "long", ...) {
-    args <- list(...)
-    newMat <- do.call(assay, args = c(list(x = object), args))
-    callNextMethod(newMat, shape = shape)
 })
 
 #' @describeIn rearrange Rearrange data from the \code{ExperimentList} class
@@ -675,34 +668,6 @@ setMethod("reduce", "ANY", function(x, drop.empty.ranges = FALSE,
     }
     return(x)
 })
-
-#' @describeIn RangedRaggedAssay Use metadata column to produce a matrix which
-#' can then be merged across replicates.
-#' @seealso \link{assay,RangedRaggedAssay,missing-method}
-#' @param drop.empty.ranges unused argument
-#' @param replicates reduce: A logical list where each element represents a
-#' sample and a vector of repeated experiments for the sample (default NULL)
-#' @param combine A function for consolidating columns in the matrix
-#' representation of the data (default rowMeans)
-#' @param vectorized logical (default TRUE) whether the \code{combine} function
-#' is vectorized, optimized for working down the vector pairs
-setMethod("reduce", "RangedRaggedAssay",
-          function(x, drop.empty.ranges = FALSE, replicates = NULL,
-                   combine = rowMeans, vectorized = TRUE, mcolname=NULL,
-                   ...) {
-              x <- x[, lengths(x) > 0L ]
-              args <- list(...)
-              if (is.null(mcolname))
-                  mcolname <- .findNumericMcol(x)
-              x <- disjoin(x, mcolname = mcolname)
-              argList <- .splitArgs(args)
-              argList[[1L]]$mcolname <- mcolname
-              x <- do.call(assay, c(list(x = x), argList[[1L]]))
-              do.call(reduce, c(list(x = x, replicates = replicates,
-                                     combine = combine,
-                                     vectorized = vectorized),
-                                argList[[2L]]))
-          })
 
 #' @describeIn MultiAssayExperiment Add an element to the
 #' \code{ExperimentList} data slot

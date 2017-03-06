@@ -71,7 +71,7 @@ range-based datasets, one set of genomic ranges are assayed for multiple
 samples. It can be used for gene expression, methylation, or other data
 types that refer to genomic positions. 
 
-- `MultiAssayExperiment::RangedRaggedAssay`: inherits from `GRangesList`, for
+- `RaggedExperiment::RaggedExperiment`: inherits from `GRangesList`, for
 ranged-based ragged arrays, meaning that a potentially different set of
 genomic ranges are assayed for each sample. A typical example would be
 segmented copy number, where segmentation of copy number alterations occurs
@@ -90,7 +90,7 @@ The column names correspond to samples, and are used to match assay data to
 specimen metadata stored in `pData`. 
 
 The row names can correspond to a variety of features in the data including
-but not limited to gene names, probe IDs, proteins, and named ranges. Note that the existence of "row" names does *not* mean the data must be rectangular or matrix-like. The RangedRaggedAssay class, for example, supports ragged arrays where the number and identifiers of measurements can be different for each sample.
+but not limited to gene names, probe IDs, proteins, and named ranges. Note that the existence of "row" names does *not* mean the data must be rectangular or matrix-like. The RaggedExperiment class, for example, supports ragged arrays where the number and identifiers of measurements can be different for each sample.
 
 Classes contained in the `ExperimentList` must support the following list of
 methods:
@@ -237,7 +237,8 @@ class(metadata(empty)) # NULL (class "ANY")
 In this section we demonstrate all core supported data classes, using different
 sample ID conventions for each assay, with primary pData. The some 
 supported classes such as, `matrix`, `ExpressionSet`, 
-`SummarizedExperiment`, `RangedSummarizedExperiment`, and `RangedRaggedAssay`.
+`SummarizedExperiment`, `RangedSummarizedExperiment`, and `RaggedExperiment`
+(coming soon).
 
 ## Create toy datasets demonstrating all supported data types
 
@@ -308,7 +309,7 @@ sample names.
                         stringsAsFactors = FALSE))
 ```
 
-Let's include a `RangedRaggedAssay`, which is defined in this package and
+Let's include a `RaggedExperiment`, which is defined in this package and
 extends `GRangesList`. This is intended for data such as segmented copy
 number, which provides genomic ranges that may be different for each sample.
 We start with a `GRangesList`, which will later be converted automatically
@@ -334,10 +335,14 @@ names(grl) <- c("snparray1", "snparray2", "snparray3")
 grl
 ```
 
+```{r, eval = FALSE}
+RaggedExperiment::RaggedExperiment(grl)
+```
+
 The following `data.frame` matches `pData` samples to the
 `GRangesList`:
 
-```{r}
+```{r, eval = FALSE}
 (rangemap <- data.frame(primary = c("Jack", "Jill", "Jill"),
                         assay = c("snparray1", "snparray2", "snparray3"),
                         stringsAsFactors = FALSE))
@@ -381,8 +386,8 @@ samples of each experiment back to the `pData`, as a three-column
 "colname". Here we start with a list:
 
 ```{r}
-listmap <- list(exprmap, methylmap, micromap, rangemap, rangemap2)
-names(listmap) <- c("Affy", "Methyl 450k", "Mirna", "CNV gistic", "CNV gistic2")
+listmap <- list(exprmap, methylmap, micromap, rangemap2)
+names(listmap) <- c("Affy", "Methyl 450k", "Mirna", "CNV gistic2")
 listmap
 ```
 
@@ -407,7 +412,7 @@ All of these names must be found within in the third column of `dfmap`:
 
 ```{r}
 objlist <- list("Affy" = exprdat, "Methyl 450k" = methyldat,
-                "Mirna" = microdat, "CNV gistic" = grl, "CNV gistic2" = rse)
+                "Mirna" = microdat, "CNV gistic2" = rse)
 ```
 
 ## Creation of the `MultiAssayExperiment` class object
@@ -461,7 +466,7 @@ identical and unique, names will be standardized to lower case and replaced.
 ```{r}
 names(objlist3) <- toupper(names(objlist))
 names(objlist3)
-unique(dfmap[, "assay"])
+levels(dfmap[["assay"]])
 PrepMultiAssay(objlist3, patient.data, dfmap)$ExperimentList
 ```
 
@@ -558,16 +563,16 @@ sedf
 makeSummarizedExperimentFromDataFrame(sedf)
 ```
 
-# `RangedRaggedAssay` class
+# `RaggedExperiment` class
 
-Note that the `GRangesList` got converted to a `RangedRaggedAssay`, a class
+Note that the `GRangesList` got converted to a `RaggedExperiment`, a class
 intended for data such as segmented copy number that is provides different
-genomic ranges for each sample. `RangedRaggedAssay` is defined by this
+genomic ranges for each sample. `RaggedExperiment` is defined by this
 package and inherits from `GRangesList`:
 
-```{r}
-methods(class="RangedRaggedAssay")
-getMethod("dimnames", "RangedRaggedAssay")
+```{r, eval=FALSE}
+methods(class="RaggedExperiment")
+getMethod("dimnames", "RaggedExperiment")
 ```
 
 It has some additional methods that are required for any data class contained
@@ -580,10 +585,10 @@ colnames(experiments(myMultiAssay)[[4]])
 ```
 
 One of the requirements for the `assay` method (specifically for this
-`RangedRaggedAssay` `ExperimentList` element) is that the metadata have a
+`RaggedExperiment` `ExperimentList` element) is that the metadata have a
 `score` column from which to obtain values for the resulting assay matrix.
 Here we have added ficticious values to such column contained within list
-elements. See `assay,RangedRaggedAssay,ANY-method` documentation.
+elements. See `assay,RaggedExperiment,ANY-method` documentation.
 
 ```{r}
 assay(experiments(myMultiAssay)[[4]], background = 2)
@@ -594,10 +599,11 @@ assay(experiments(myMultiAssay)[[4]], background = 2)
 The `assay` method uses the "inner" metadata columns to obtain a 
 score value from which to create the assay matrix.
 
-```{r}
-rra <- experiments(myMultiAssay)[[4]]
-mcols(rra[[1]])
-assay(rra, background = 2)
+```{r, eval = FALSE}
+reIdx <- which(sapply(experiments(myMultiAssay), class) == "RaggedExperiment") 
+re <- myMultiAssay[[reIdx]]
+assays(re)
+assay(re)
 ```
 
 # Integrated subsetting across experiments
@@ -622,7 +628,7 @@ myMultiAssay["ENST00000355076", , ]
 
 The above operation works across all types of assays, whether ID-based
 (e.g. matrix, ExpressionSet, SummarizedExperiment) or range-based
-(e.g. RangedSummarizedExperiment, RangedRaggedAssay). Note that when using
+(e.g. RangedSummarizedExperiment, RangedExperiment). Note that when using
 the bracket method `[`, the drop argument is *TRUE* by default.
 
 You can subset by rows, columns, and assays in a single bracket operation,
@@ -715,7 +721,7 @@ You can select certain assays / experiments using subset, by providing a
 character, logical, or integer vector.  An example using character:
 
 ```{r}
-myMultiAssay[, , c("Affy", "CNV gistic")]
+myMultiAssay[, , c("Affy")]
 ```
 
 You can subset assays also using logical or integer vectors:
@@ -731,7 +737,7 @@ myMultiAssay[, , which(is.cnv)] #integer subsetting
 
 Rows of the assays correspond to assay features or measurements, such as genes.
 Regardless of whether the assay is ID-based (e.g., matrix, ExpressionSet) or
-range-based (e.g., RangedSummarizedExperiment, RangedRaggedAssay), they can be
+range-based (e.g., RangedSummarizedExperiment, RaggedExperiment), they can be
 subset using any of the following:
 
 - a **character vector** of IDs that will be matched to rownames in each assay
@@ -779,7 +785,7 @@ exprs(experiments(featSubsetted)[[1]])
 ## Subsetting rows (features) by `GenomicRanges`
 
 For `MultiAssayExperiment` objects containing range-based objects (currently
-`RangedSummarizedExperiment` and `RangedRaggedAssay`), these can be subset
+`RangedSummarizedExperiment` and `RaggedExperiment`), these can be subset
 using a `GRanges` object, for example:
 
 ```{r}

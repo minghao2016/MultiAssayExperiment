@@ -26,9 +26,9 @@
 ## Ensure ExperimentList elements are appropriate for the API and rownames
 ## are present
 .PrepElements <- function(object) {
-    ## use is() to exclude RangedRaggedAssay
-    if (is(object, "GRangesList") && !is(object, "RangedRaggedAssay")) {
-        object <- RangedRaggedAssay(object)
+    ## use is() to exclude RaggedExperiment
+    if (is(object, "GRangesList") && !is(object, "RaggedExperiment")) {
+        object <- RaggedExperiment::RaggedExperiment(object)
     }
     if (is.null(rownames(object))) {
         object <- .createRownames(object)

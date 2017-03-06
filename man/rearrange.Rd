@@ -4,7 +4,6 @@
 \name{rearrange}
 \alias{rearrange}
 \alias{rearrange,ANY-method}
-\alias{rearrange,RangedRaggedAssay-method}
 \alias{rearrange,ExperimentList-method}
 \alias{rearrange,MultiAssayExperiment-method}
 \title{Reshape raw data from an object}
@@ -12,8 +11,6 @@
 rearrange(object, shape = "long", ...)
 
 \S4method{rearrange}{ANY}(object, shape = "long", ...)
-
-\S4method{rearrange}{RangedRaggedAssay}(object, shape = "long", ...)
 
 \S4method{rearrange}{ExperimentList}(object, shape = "long", ...)
 
@@ -26,7 +23,7 @@ rearrange(object, shape = "long", ...)
 \item{shape}{A single string indicating the shape of the resulting data,
 options include \sQuote{long} and \sQuote{wide} (defaults to the former)}
 
-\item{...}{Additional arguments for the \link{RangedRaggedAssay}
+\item{...}{Additional arguments
 \code{assay} method. See below.}
 
 \item{pDataCols}{selected pData columns to include in the resulting output}
@@ -47,9 +44,6 @@ pData columns with the \code{pDataCols} argument for a
 \item \code{ANY}: ANY class method, works with classes such as
 \link{ExpressionSet} and \link{SummarizedExperiment} as well as \code{matrix}
 
-\item \code{RangedRaggedAssay}: \linkS4class{RangedRaggedAssay} class method to return
-matrix of selected \dQuote{mcolname} column, defaults to score
-
 \item \code{ExperimentList}: Rearrange data from the \code{ExperimentList} class
 returns list of DataFrames
 
@@ -59,10 +53,7 @@ the user to append pData columns to the long and skinny DataFrame.
 }}
 
 \examples{
-example("RangedRaggedAssay")
-rearrange(myRRA, background = 0)
+rearrange(matrix(rnorm(20), ncol = 4,
+dimnames = list(paste0("ENST0000", 1:5), c("A", "B", "C", "D"))))
 
-}
-\seealso{
-\code{\link{assay,RangedRaggedAssay,missing-method}}
 }

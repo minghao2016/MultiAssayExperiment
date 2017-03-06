@@ -10,11 +10,9 @@ test_that("rearrange returns a DataFrame", {
 
     matDF <- rearrange(testMat)
     ESetDF <- rearrange(testESet)
-    RRADF <- rearrange(myRRA)
 
     expect_true(is(matDF, "DataFrame"))
     expect_true(is(ESetDF, "DataFrame"))
-    expect_true(is(RRADF, "DataFrame"))
 })
 
 longDF <- rearrange(myMultiAssayExperiment, pDataCols = "sex")

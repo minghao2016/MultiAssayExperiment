@@ -20,14 +20,22 @@ test_that("subsettor length is of the same as MultiAssayExperiment", {
 })
 
 test_that("drop argument works", {
-  expect_equal(length(myMultiAssayExperiment[, colList, drop = TRUE]), 3L)
-  expect_equal(length(myMultiAssayExperiment[, colList, drop = FALSE]), 4L)
-  expect_equal(length(myMultiAssayExperiment[rowList, drop = TRUE]), 3L)
-  expect_equal(length(myMultiAssayExperiment[rowList, drop = FALSE]), 4L)
-  expect_equal(length(myMultiAssayExperiment[FALSE, drop = TRUE]), 0L)
-  expect_equal(length(myMultiAssayExperiment[FALSE, drop = FALSE]), 4L)
-  expect_equal(length(myMultiAssayExperiment[, FALSE, drop = TRUE]), 0L)
-  expect_equal(length(myMultiAssayExperiment[, FALSE, drop = FALSE]), 4L)
+    fullLength <- length(myMultiAssayExperiment)
+    minusOne <- length(myMultiAssayExperiment)-1L
+    expect_equal(length(myMultiAssayExperiment[, colList, drop = TRUE]),
+                 minusOne)
+    expect_equal(length(myMultiAssayExperiment[, colList, drop = FALSE]),
+                 fullLength)
+    expect_equal(length(myMultiAssayExperiment[rowList, drop = TRUE]),
+                 minusOne)
+    expect_equal(length(myMultiAssayExperiment[rowList, drop = FALSE]),
+                 fullLength)
+    expect_equal(length(myMultiAssayExperiment[FALSE, drop = TRUE]), 0L)
+    expect_equal(length(myMultiAssayExperiment[FALSE, drop = FALSE]),
+                 fullLength)
+    expect_equal(length(myMultiAssayExperiment[, FALSE, drop = TRUE]), 0L)
+    expect_equal(length(myMultiAssayExperiment[, FALSE, drop = FALSE]),
+                 fullLength)
 })
 
 test_that("subsetByColumns works with lists", {
