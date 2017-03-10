@@ -405,5 +405,35 @@ setMethod("updateObject", "MultiAssayExperiment",
                                 metadata = metadata(object),
                                 drops = object@drops)
               }
+              classes <- vapply(experiments(object),
+                                function(x) {class(x)}, character(1L))
+              if (any(classes %in% "RangedRaggedAssay")) {
+                  rraIdx <- which(classes == "RangedRaggedAssay")
+                  for (i in rraIdx) {
+                      object[[i]] <- as(object[[i]], "RaggedExperiment")
+                  }
+              }
               return(object)
           })
+
+#' RangedRaggedAssay
+#'
+#' This class has been deprecated in place for the RaggedExperiment class.
+#' Please see that package for representing mutation and copy number data.
+#'
+#' @param x A \code{list}, \code{GRanges} or \code{GRangesList} object
+#' @exportClass RangedRaggedAssay
+#' @export RangedRaggedAssay
+.RangedRaggedAssay <- setClass("RangedRaggedAssay", contains = "GRangesList")
+
+RangedRaggedAssay <- function(x = GRangesList()) {
+    .Deprecated("RaggedExperiment")
+}
+
+#' @importClassesFrom RaggedExperiment RaggedExperiment
+#' @importFrom RaggedExperiment RaggedExperiment
+setAs("RangedRaggedAssay", "RaggedExperiment", function(from) {
+    colData <- mcols(from)
+    from <- as.list(from)
+    RaggedExperiment(from, colData = colData)
+})
